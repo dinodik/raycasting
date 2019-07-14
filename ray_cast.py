@@ -6,7 +6,7 @@ pygame.init()
 
 width, height = 640, 400
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("")
+pygame.display.set_caption("Ray Casting")
 
 colours = {
     'background': (0, 0, 0),
@@ -270,7 +270,7 @@ while True:
             ## Reset
             elif chr(event.key) == 'r':
                 setup()
-        ## Stop moving 
+        ## Stop moving
         elif event.type == pygame.KEYUP:
             if chr(event.key) in directions.keys():
                 player.moving = False
