@@ -9,27 +9,27 @@ screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Ray Casting")
 
 colours = {
-    'background': (0, 0, 0),
-    'player': (255, 255, 255),
+    'background': (50, 50, 50),
+    'particle': (255, 255, 255),
     'ray': (120, 140, 120),
     'segment': (255, 120, 0),
     'light': (200, 200, 200),
     'boundary': (255, 120, 0)
 }
 
-player_speed = 4
+particle_speed = 4
 directions = {
-    'w': Vec2D(0, -player_speed),
-    'a': Vec2D(-player_speed, 0),
-    's': Vec2D(0, player_speed),
-    'd': Vec2D(player_speed, 0)
+    'w': Vec2D(0, -particle_speed),
+    'a': Vec2D(-particle_speed, 0),
+    's': Vec2D(0, particle_speed),
+    'd': Vec2D(particle_speed, 0)
 }
 
 class Player:
     def __init__(self, pos):
         self.pos = pos
         self.fov = math.pi / 2
-        self.colour = colours['player']
+        self.colour = colours['particle']
         self.size = 8
         self.moving = False
         self.moving_dir = []
@@ -75,7 +75,7 @@ class Player:
             return False
 
     def update(self, lookingAt, walls):
-        ## Moving the player
+        ## Moving the particle
         for dir in self.moving_dir:
             new_pos = self.pos + directions[dir]
             if 0 < new_pos.x < width and 0 < new_pos.y < height: ## If in screen
@@ -110,7 +110,7 @@ class Player:
             pygame.draw.polygon(screen, colours['light'], [point.tuple() for point in points]) ## Filled light
         else:
             pygame.draw.polygon(screen, colours['light'], [point.tuple() for point in points], 2) ## Draw outline
-        ## Drawing player
+        ## Drawing particle
         pygame.draw.circle(screen, self.colour, self.pos.tuple(), int(self.size / 2))
 
 class Ray:
@@ -222,11 +222,11 @@ draw_rays = False ## Draw individual rays
 draw_light = True ## Draw light polygon
 
 def setup():
-    global finished, player, segments, fixed_points, shapes
+    global finished, particle, segments, fixed_points, shapes
     finished = False
 
     ## Player(starting_pos)
-    player = Player(Vec2D(width / 2, height / 2))
+    particle = Player(Vec2D(width / 2, height / 2))
 
     segments = []
     ## Random walls
@@ -268,24 +268,24 @@ while True:
         if event.type == QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             pygame.quit()
             sys.exit()
-        ## Detecting WASD inputs for moving player
+        ## Detecting WASD inputs for moving particle
         if event.type == pygame.KEYDOWN:
             if chr(event.key) in directions.keys():
-                player.moving = True
-                player.moving_dir.append(chr(event.key))
+                particle.moving = True
+                particle.moving_dir.append(chr(event.key))
             ## Reset
             elif chr(event.key) == 'r':
                 setup()
         ## Stop moving
         elif event.type == pygame.KEYUP:
             if chr(event.key) in directions.keys():
-                player.moving = False
+                particle.moving = False
                 try:
-                    player.moving_dir.remove(chr(event.key))
+                    particle.moving_dir.remove(chr(event.key))
                 except ValueError: pass ## To catch error when resetting while still moving
 
-    player.update(getMousePos(), segments)
-    player.show()
+    particle.update(getMousePos(), segments)
+    particle.show()
 
     for segment in segments:
         segment.show()

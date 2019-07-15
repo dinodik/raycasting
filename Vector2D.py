@@ -29,4 +29,5 @@ class Vec2D:
         return atan2(other.y - self.y, other.x - self.x)
 
     def tuple(self):
+        """Returns tuple (int(x), int(y))"""
         return (int(self.x), int(self.y))
