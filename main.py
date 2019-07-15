@@ -13,7 +13,7 @@ colours = {
     'particle': (255, 255, 255),
     'ray': (120, 140, 120),
     'segment': (255, 120, 0),
-    'light': (200, 200, 200, 255),
+    'light': (200, 200, 200),
     'boundary': (255, 120, 0)
 }
 
@@ -25,7 +25,7 @@ directions = {
     'd': Vec2D(particle_speed, 0)
 }
 
-class Player:
+class Particle:
     def __init__(self, pos):
         self.pos = pos
         self.fov = math.pi / 2
@@ -34,7 +34,7 @@ class Player:
         self.moving = False
         self.moving_dir = []
 
-    def cast(self):
+    def cast(self, fixed_points):
         ## Left FOV boundary
         left_bound = Ray(self.pos, self.angle - self.fov / 2)
         self.rays = [left_bound]
@@ -74,7 +74,7 @@ class Player:
         else:
             return False
 
-    def update(self, lookingAt, walls):
+    def update(self, lookingAt, walls, fixed_points):
         ## Moving the particle
         for dir in self.moving_dir:
             new_pos = self.pos + directions[dir]
@@ -87,7 +87,7 @@ class Player:
 
         self.angle_origin = (self.angle - self.fov / 2) % math.tau  ## This is the new 0 point - the lower_bound of the FOV
 
-        self.cast() ## Cast rays
+        self.cast(fixed_points) ## Cast rays
 
         self.points = []
         for ray in self.rays:
@@ -107,6 +107,7 @@ class Player:
 
         ## Drawing light
         if draw_light:
+            ## Draw on alpha surface
             # surf_ray = pygame.Surface((width, height))
             # surf_ray.set_alpha(100)
             # pygame.draw.polygon(surf_ray, colours['light'], [point.tuple() for point in points]) ## Filled light
@@ -128,14 +129,12 @@ class Ray:
         self.dir = Vec2D(math.cos(self.angle), math.sin(self.angle))
 
     def intersect(self, p1, p2):
-        den = (p1.x - p2.x) * (self.start_pos.y - (self.start_pos.y + self.dir.y)) - (p1.y - p2.y) * (
-        self.start_pos.x - (self.start_pos.x + self.dir.x))
+        den = (p1.x - p2.x) * (self.start_pos.y - (self.start_pos.y + self.dir.y)) - (p1.y - p2.y) * (self.start_pos.x - (self.start_pos.x + self.dir.x))
 
         if den == 0:
             return
 
-        t = ((p1.x - self.start_pos.x) * (self.start_pos.y - (self.start_pos.y + self.dir.y)) - (p1.y - self.start_pos.y) * (
-        self.start_pos.x - (self.start_pos.x + self.dir.x))) / den
+        t = ((p1.x - self.start_pos.x) * (self.start_pos.y - (self.start_pos.y + self.dir.y)) - (p1.y - self.start_pos.y) * (self.start_pos.x - (self.start_pos.x + self.dir.x))) / den
         u = -(((p1.x - p2.x) * (p1.y - self.start_pos.y) - (p1.y - p2.y) * (p1.x - self.start_pos.x)) / den)
 
         if t > 0 and t < 1 and u > 0:
@@ -229,8 +228,8 @@ def setup():
     global finished, particle, segments, fixed_points, shapes
     finished = False
 
-    ## Player(starting_pos)
-    particle = Player(Vec2D(width / 2, height / 2))
+    ## Particle(starting_pos)
+    particle = Particle(Vec2D(width / 2, height / 2))
 
     segments = []
     ## Random walls
@@ -264,8 +263,6 @@ def setup():
 
 setup()
 
-clock = pygame.time.Clock()
-
 while True:
     if not finished:
         screen.fill(colours['background'])
@@ -290,7 +287,7 @@ while True:
                     particle.moving_dir.remove(chr(event.key))
                 except ValueError: pass ## To catch error when resetting while still moving
 
-    particle.update(getMousePos(), segments)
+    particle.update(getMousePos(), segments, fixed_points)
     particle.show()
 
     for segment in segments:
@@ -298,9 +295,5 @@ while True:
 
     for shape in shapes:
         shape.show()
-
-    clock.tick()
-    fps = clock.get_fps()
-    print(fps)
 
     pygame.display.update()
