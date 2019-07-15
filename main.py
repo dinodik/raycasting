@@ -13,7 +13,7 @@ colours = {
     'particle': (255, 255, 255),
     'ray': (120, 140, 120),
     'segment': (255, 120, 0),
-    'light': (200, 200, 200),
+    'light': (200, 200, 200, 255),
     'boundary': (255, 120, 0)
 }
 
@@ -107,7 +107,11 @@ class Player:
 
         ## Drawing light
         if draw_light:
-            pygame.draw.polygon(screen, colours['light'], [point.tuple() for point in points]) ## Filled light
+            # surf_ray = pygame.Surface((width, height))
+            # surf_ray.set_alpha(100)
+            # pygame.draw.polygon(surf_ray, colours['light'], [point.tuple() for point in points]) ## Filled light
+            # screen.blit(surf_ray, (0, 0))
+            pygame.draw.polygon(screen, colours['light'], [point.tuple() for point in points])  ## Filled light
         else:
             pygame.draw.polygon(screen, colours['light'], [point.tuple() for point in points], 2) ## Draw outline
         ## Drawing particle
@@ -260,6 +264,8 @@ def setup():
 
 setup()
 
+clock = pygame.time.Clock()
+
 while True:
     if not finished:
         screen.fill(colours['background'])
@@ -292,5 +298,9 @@ while True:
 
     for shape in shapes:
         shape.show()
+
+    clock.tick()
+    fps = clock.get_fps()
+    print(fps)
 
     pygame.display.update()
