@@ -92,7 +92,8 @@ class Player:
         self.points = []
         for ray in self.rays:
             self.points.append(ray.update(walls))
-            # ray.show() ## Draw each ray
+            if draw_rays:
+                ray.show() ## Draw each ray
 
     def show(self):
         ## Sort points in order of angle
@@ -105,7 +106,10 @@ class Player:
         points.append(self.pos) ## Closing off polygon with self.pos
 
         ## Drawing light
-        pygame.draw.polygon(screen, colours['light'], [point.tuple() for point in points])
+        if draw_light:
+            pygame.draw.polygon(screen, colours['light'], [point.tuple() for point in points]) ## Filled light
+        else:
+            pygame.draw.polygon(screen, colours['light'], [point.tuple() for point in points], 2) ## Draw outline
         ## Drawing player
         pygame.draw.circle(screen, self.colour, self.pos.tuple(), int(self.size / 2))
 
@@ -211,9 +215,11 @@ def getFixedPoints(segs):
         points['edges'].append(segs[i].p2)
     return points
 
-# VARIABLES
-
+# CONSTANTS
 eps = 0.00001 ## Very small number
+boundary_width = 2 ## Width of the boundary lines
+draw_rays = False ## Draw individual rays
+draw_light = True ## Draw light polygon
 
 def setup():
     global finished, player, segments, fixed_points, shapes
@@ -235,8 +241,8 @@ def setup():
     ## Custom shapes
     shapes = [
         ## Bounding box
-        Shape(4, colours['boundary'], [Vec2D(0, 0), Vec2D(width - 1, 0), Vec2D(width - 1, height - 1), Vec2D(0, height - 1)], 2),
-        ## Test octogon
+        Shape(4, colours['boundary'], [Vec2D(0, 0), Vec2D(width - boundary_width, 0), Vec2D(width - boundary_width, height - boundary_width), Vec2D(0, height - boundary_width)], boundary_width),
+        ## Test octagon
         Shape(8, (120, 255, 255), [Vec2D(358, 108), Vec2D(282, 108), Vec2D(228, 162), Vec2D(228, 238), Vec2D(282, 292), Vec2D(358, 292), Vec2D(412, 238), Vec2D(412, 162)], 2)
     ]
 
@@ -274,7 +280,9 @@ while True:
         elif event.type == pygame.KEYUP:
             if chr(event.key) in directions.keys():
                 player.moving = False
-                player.moving_dir.remove(chr(event.key))
+                try:
+                    player.moving_dir.remove(chr(event.key))
+                except ValueError: pass ## To catch error when resetting while still moving
 
     player.update(getMousePos(), segments)
     player.show()
