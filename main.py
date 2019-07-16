@@ -279,6 +279,9 @@ while True:
             ## Reset
             elif chr(event.key) == 'r':
                 setup()
+            elif chr(event.key) == 'f':
+                draw_rays = not draw_rays
+                draw_light = not draw_light
         ## Stop moving
         elif event.type == pygame.KEYUP:
             if chr(event.key) in directions.keys():
