@@ -1,6 +1,5 @@
 import pygame, sys, math, random
 from pygame.locals import *
-from Vector2D import Vec2D
 
 pygame.init()
 
